@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TicketSmart</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section id="loginView" class="login-view">
+        <div class="login-visual">
+          <h1>TicketSmart</h1>
+        </div>
+
+        <form id="loginForm" class="login-card">
+          <h2>Вход в системата</h2>
+          <label>
+            Потребител
+            <input name="email" type="text" value="admin" required />
+          </label>
+          <label>
+            Парола
+            <input name="password" type="password" value="123" required />
+          </label>
+          <button type="submit">Вход</button>
+          <p class="hint">
+            Профили: admin / 123, agent1 / 123, agent2 / 123, agent3 / 123,
+            user1 / 123, user2 / 123
+          </p>
+          <p id="loginError" class="error"></p>
+        </form>
+      </section>
+
+      <section id="appView" class="app-view hidden">
+        <aside class="sidebar">
+          <div>
+            <p class="eyebrow">TicketSmart</p>
+            <h2>Управление на тикети</h2>
+          </div>
+
+          <nav class="filters hidden" id="adminViewTabs">
+            <button class="filter-button active" data-view="tickets">Тикети</button>
+            <button class="filter-button" data-view="agents" id="agentsTabButton">Агенти</button>
+            <button class="filter-button" data-view="absences">
+              Отсъствия
+              <span id="absencesTabBadge" class="tab-badge hidden">0</span>
+            </button>
+          </nav>
+
+          <div class="user-panel">
+            <strong id="currentUserName"></strong>
+            <span id="currentUserRole"></span>
+            <button id="logoutButton" class="secondary">Изход</button>
+          </div>
+        </aside>
+
+        <section class="main-area">
+          <header class="toolbar">
+            <div>
+              <p class="eyebrow">Оперативно табло</p>
+              <h1>Тикети и срокове</h1>
+            </div>
+            <div class="toolbar-actions">
+              <div class="notification-center">
+                <button id="notificationButton" class="notification-button secondary" type="button" aria-label="Нотификации" title="Нотификации" aria-expanded="false">
+                  <svg class="notification-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
+                  <span id="notificationCount">0</span>
+                </button>
+                <div id="notificationPanel" class="notification-panel hidden">
+                  <div class="notification-panel-header">
+                    <div>
+                      <strong>Нотификации</strong>
+                      <small id="notificationUnreadText">0 непрочетени</small>
+                    </div>
+                    <button id="markAllNotificationsReadButton" class="secondary" type="button">Прочети всички</button>
+                  </div>
+                  <div id="notificationList" class="notification-list"></div>
+                </div>
+              </div>
+              <button id="openCreateDialogButton">Нов тикет</button>
+            </div>
+          </header>
+
+          <section id="ticketsView">
+            <section class="stats">
+              <article><span id="statTotal">0</span><small>Общо</small></article>
+              <article><span id="statOpen">0</span><small>Отворени</small></article>
+              <article><span id="statInProgress">0</span><small>В прогрес</small></article>
+              <article><span id="statReopened">0</span><small>Повторно отворени</small></article>
+              <article><span id="statClosed">0</span><small>Затворени</small></article>
+              <article><span id="statOverdue">0</span><small>Просрочени</small></article>
+              <article id="averageRatingCard"><span id="statAverageRating">-</span><small>Средна оценка</small></article>
+            </section>
+
+            <section class="work-grid">
+              <div class="list-panel">
+                <div class="list-tools">
+                  <div class="search-filter-row">
+                    <input id="searchInput" type="search" placeholder="Търсене по номер, заглавие или категория" />
+                    <div class="filters-menu">
+                      <button id="filtersMenuButton" type="button" class="secondary">Филтри</button>
+                      <div id="filtersMenuPanel" class="filters-menu-panel hidden">
+                        <label>
+                          Статус
+                          <select id="statusFilter">
+                            <option value="All">Всички</option>
+                            <option value="Open">Отворени</option>
+                            <option value="InProgress">В прогрес</option>
+                            <option value="Reopened">Повторно отворени</option>
+                            <option value="Closed">Затворени</option>
+                          </select>
+                        </label>
+                        <label>
+                          Приоритет
+                          <select id="priorityFilter">
+                            <option value="All">Всички приоритети</option>
+                            <option value="High">Висока</option>
+                            <option value="Medium">Средна</option>
+                            <option value="Low">Ниска</option>
+                          </select>
+                        </label>
+                        <label>
+                          Категория
+                          <select id="categoryFilter">
+                            <option value="All">Всички категории</option>
+                            <option value="Достъп и права">Достъп и права</option>
+                            <option value="Кредитни операции">Кредитни операции</option>
+                            <option value="Системни инциденти">Системни инциденти</option>
+                            <option value="Организационни промени">Организационни промени</option>
+                          </select>
+                        </label>
+                        <label class="admin-ticket-filter hidden">
+                          Агент
+                          <select id="agentTicketFilter">
+                            <option value="All">Всички агенти</option>
+                          </select>
+                        </label>
+                        <label class="admin-ticket-filter hidden">
+                          Потребител
+                          <select id="requesterTicketFilter">
+                            <option value="All">Всички потребители</option>
+                          </select>
+                        </label>
+                        <button id="clearFiltersButton" type="button" class="secondary">Изчисти филтри</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div id="ticketList" class="ticket-list"></div>
+              </div>
+
+              <article id="ticketDetails" class="details-panel">
+                <p class="empty">Избери тикет, за да видиш подробности и действия.</p>
+              </article>
+            </section>
+          </section>
+
+          <section id="agentsView" class="work-grid hidden">
+            <div class="list-panel">
+              <div class="list-tools">
+                <button id="openCreateAgentDialogButton" type="button">Добави агент</button>
+                <button id="exportKpiButton" type="button" class="secondary">Експорт в Excel</button>
+              </div>
+              <div id="agentList" class="ticket-list"></div>
+            </div>
+
+            <article id="agentDetails" class="details-panel">
+              <p class="empty">Избери агент, за да видиш подробности.</p>
+            </article>
+          </section>
+
+          <section id="absencesView" class="work-grid hidden">
+            <div class="list-panel">
+              <div class="list-tools">
+                <button id="openCreateAbsenceDialogButton" type="button">Ново отсъствие</button>
+                <button id="requestAbsenceButton" class="hidden" type="button">Заяви отсъствие</button>
+              </div>
+              <div id="absenceList" class="ticket-list"></div>
+            </div>
+
+            <article class="details-panel">
+              <div class="calendar-header">
+                <button id="calendarPrevButton" type="button" class="secondary">‹</button>
+                <h3 id="calendarMonthLabel"></h3>
+                <button id="calendarNextButton" type="button" class="secondary">›</button>
+              </div>
+              <div id="absenceCalendarGrid" class="calendar-grid"></div>
+              <div class="calendar-legend">
+                <span><i class="legend-dot SickLeave"></i>Болничен</span>
+                <span><i class="legend-dot PaidLeave"></i>Платен отпуск</span>
+                <span><i class="legend-dot UnpaidLeave"></i>Неплатен отпуск</span>
+              </div>
+            </article>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="createDialog">
+      <form id="createTicketForm">
+        <h2>Нов тикет</h2>
+        <div class="title-field">
+          <label>
+            Заглавие
+            <input name="title" maxlength="90" required autocomplete="off" />
+          </label>
+          <div id="categorySuggestions" class="category-suggestions-dropdown hidden"></div>
+        </div>
+        <label>
+          Категория
+          <select name="category" id="createCategorySelect" required>
+            <option value="Достъп и права">Достъп и права</option>
+            <option value="Кредитни операции">Кредитни операции</option>
+            <option value="Системни инциденти">Системни инциденти</option>
+            <option value="Организационни промени" selected>Организационни промени</option>
+          </select>
+        </label>
+        <label>
+          Подкатегория
+          <select name="subCategory" id="createSubCategorySelect" required></select>
+        </label>
+        <label>
+          Спешност
+          <select name="priority">
+            <option value="Low">Ниска - 24ч.</option>
+            <option value="Medium" selected>Средна - 8ч.</option>
+            <option value="High">Висока - 2ч.</option>
+          </select>
+        </label>
+        <label>
+          Описание
+          <textarea name="description" rows="5" required></textarea>
+        </label>
+        <label>
+          Прикачен файл (незадължително)
+          <input type="file" name="attachment" id="createAttachmentInput" accept=".jpg,.jpeg,.png,.webp,.gif,.pdf,.docx,.xlsx,.txt,.log" />
+        </label>
+        <p class="hint">Позволени: JPG, PNG, WEBP, GIF, PDF, DOCX, XLSX, TXT, LOG · до 3 MB</p>
+        <p id="createTicketError" class="error"></p>
+        <div class="dialog-actions">
+          <button type="button" id="cancelCreateButton" class="secondary">Отказ</button>
+          <button type="submit">Създай тикет</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="feedbackDialog">
+      <form id="feedbackForm">
+        <h2>Обратна връзка</h2>
+        <p id="feedbackTicketTitle" class="hint"></p>
+        <fieldset class="rating-field">
+          <legend>Оценка</legend>
+          <div class="star-rating">
+            <input id="rating5" name="rating" type="radio" value="5" required />
+            <label for="rating5" title="5 звезди">★</label>
+            <input id="rating4" name="rating" type="radio" value="4" />
+            <label for="rating4" title="4 звезди">★</label>
+            <input id="rating3" name="rating" type="radio" value="3" />
+            <label for="rating3" title="3 звезди">★</label>
+            <input id="rating2" name="rating" type="radio" value="2" />
+            <label for="rating2" title="2 звезди">★</label>
+            <input id="rating1" name="rating" type="radio" value="1" />
+            <label for="rating1" title="1 звезда">★</label>
+          </div>
+        </fieldset>
+        <label>
+          Коментар
+          <textarea name="comment" rows="4" placeholder="Опиши накратко впечатленията си"></textarea>
+        </label>
+        <p id="feedbackError" class="error"></p>
+        <div class="dialog-actions">
+          <button type="button" id="cancelFeedbackButton" class="secondary">Отказ</button>
+          <button type="submit">Изпрати оценка</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="createAgentDialog">
+      <form id="createAgentForm">
+        <h2>Нов агент</h2>
+        <label>
+          Потребителско име
+          <input name="username" required />
+        </label>
+        <label>
+          Първична парола
+          <input name="password" type="password" required />
+        </label>
+        <p id="createAgentError" class="error"></p>
+        <div class="dialog-actions">
+          <button type="button" id="cancelCreateAgentButton" class="secondary">Отказ</button>
+          <button type="submit">Добави агент</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="createAbsenceDialog">
+      <form id="createAbsenceForm">
+        <h2>Ново отсъствие</h2>
+        <label>
+          Агент
+          <select name="agentId" id="absenceAgentSelect" required></select>
+        </label>
+        <label>
+          От дата
+          <input type="date" name="startDate" required />
+        </label>
+        <label>
+          До дата
+          <input type="date" name="endDate" required />
+        </label>
+        <label>
+          Тип
+          <select name="type" required>
+            <option value="SickLeave">Болничен</option>
+            <option value="PaidLeave">Платен отпуск</option>
+            <option value="UnpaidLeave">Неплатен отпуск</option>
+          </select>
+        </label>
+        <label>
+          Причина (незадължително)
+          <textarea name="reason" rows="3"></textarea>
+        </label>
+        <p id="createAbsenceError" class="error"></p>
+        <div class="dialog-actions">
+          <button type="button" id="cancelCreateAbsenceButton" class="secondary">Отказ</button>
+          <button type="submit">Добави и одобри</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="requestAbsenceDialog">
+      <form id="requestAbsenceForm">
+        <h2>Заявка за отпуска</h2>
+        <label>
+          От дата
+          <input type="date" name="startDate" required />
+        </label>
+        <label>
+          До дата
+          <input type="date" name="endDate" required />
+        </label>
+        <label>
+          Тип
+          <select name="type" required>
+            <option value="PaidLeave">Платен отпуск</option>
+            <option value="UnpaidLeave">Неплатен отпуск</option>
+            <option value="SickLeave">Болничен</option>
+          </select>
+        </label>
+        <label>
+          Причина
+          <textarea name="reason" rows="3" required></textarea>
+        </label>
+        <p id="requestAbsenceError" class="error"></p>
+        <div class="dialog-actions">
+          <button type="button" id="cancelRequestAbsenceButton" class="secondary">Отказ</button>
+          <button type="submit">Изпрати заявка</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="reassignConfirmDialog">
+      <div class="message-dialog">
+        <h2>Тикетът е преразпределен</h2>
+        <p id="reassignConfirmText"></p>
+        <div class="dialog-actions">
+          <button type="button" id="closeReassignConfirmButton">OK</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

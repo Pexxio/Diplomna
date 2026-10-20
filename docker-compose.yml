@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ticketsmart-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ticketsmart
+      POSTGRES_USER: ticketsmart
+      POSTGRES_PASSWORD: ticketsmart
+    ports:
+      - "5432:5432"
+    volumes:
+      - ticketsmart-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticketsmart -d ticketsmart"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  ticketsmart-postgres-data:

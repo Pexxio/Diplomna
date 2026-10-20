@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <!-- .NET 8 е LTS версия и е подходящ избор за дипломна разработка. -->
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- TicketSystem.Tests е отделен проект, вложен в тази папка - без това щеше да се компилира двойно. -->
+    <Compile Remove="TicketSystem.Tests\**" />
+    <Content Remove="TicketSystem.Tests\**" />
+    <EmbeddedResource Remove="TicketSystem.Tests\**" />
+    <None Remove="TicketSystem.Tests\**" />
+  </ItemGroup>
+</Project>
